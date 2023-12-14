@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { Post } from './post.model';
 import { Subject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class ServiceNameService {
@@ -29,6 +30,7 @@ export class PostService {
               title: post.title,
               content: post.content,
               id: post._id,
+              imagePath: post.imagePath,
             };
           });
         })
@@ -42,20 +44,51 @@ export class PostService {
   getPostUpdateListener() {
     return this.postsUpdated.asObservable();
   }
-  getPostById(id: string): Post | null {
-    return id ? { ...(this.posts.find((p) => p.id === id) as Post) } : null;
+
+  getPostById(id: string): Observable<Post | null> {
+    return this.http
+      .get<{ _id: string; title: string; content: string; imagePath: string }>(
+        'http://localhost:3000/api/posts/' + id
+      )
+      .pipe(
+        map((postData) => {
+          return {
+            id: postData._id,
+            title: postData.title,
+            content: postData.content,
+            imagePath: postData.imagePath,
+          };
+        }),
+        catchError(() => {
+          return of(null);
+        })
+      );
   }
 
-  addPost(post: Post) {
+  addPost(newPost: Post) {
+    const postData = new FormData();
+    postData.append('title', newPost.title);
+    postData.append('content', newPost.content);
+    if (newPost.image) {
+      if (typeof newPost.image === 'string') {
+        postData.append('image', newPost.image);
+      } else {
+        postData.append('image', newPost.image, newPost.title);
+      }
+    }
     this.http
-      .post<{ message: string; postId: string }>(
+      .post<{ message: string; post: Post }>(
         'http://localhost:3000/api/posts',
-        post
+        postData
       )
-      .subscribe((resp) => {
-        const postId = resp.postId;
-        post.id = postId;
-        console.log(resp.message);
+      .subscribe((respData) => {
+        const post: Post = {
+          id: respData.post.id,
+          title: newPost.title,
+          content: newPost.content,
+          imagePath: respData.post.imagePath,
+        };
+
         this.posts.push(post);
         this.postsUpdated.next([...this.posts]);
         this.router.navigate(['/']);
@@ -69,15 +102,48 @@ export class PostService {
         const updatedPosts = this.posts.filter((post) => post.id !== postId);
         this.posts = updatedPosts;
         this.postsUpdated.next([...this.posts]);
-        console.log('Deleted');
       });
   }
 
-  updatePostbyId(postId: string, post: Post) {
+  async updatePostbyId(postId: string, post: Post) {
+    console.log(post);
+
+    let postData: Post | FormData;
+    if (typeof post.image === 'object') {
+      const imageFile = post.image as File;
+      postData = new FormData();
+      postData.append('id', post.id);
+      postData.append('title', post.title);
+      postData.append('content', post.content);
+      postData.append('imagePath', imageFile, post.title);
+    } else {
+      postData = {
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        imagePath: post.image ? post.image.toString() : undefined,
+      };
+    }
+
+    console.log(postData);
+
     this.http
-      .put('http://localhost:3000/api/posts/' + postId, post)
+      .put('http://localhost:3000/api/posts/' + postId, postData)
       .subscribe((response) => {
         console.log(response);
+
+        const updatedPosts = [...this.posts];
+        const oldPostIndex = updatedPosts.findIndex((p) => p.id === post.id);
+        const newPost: Post = {
+          id: postId,
+          title: post.title,
+          content: post.content,
+          imagePath: post.imagePath,
+        };
+        updatedPosts[oldPostIndex] = post;
+        this.posts = updatedPosts;
+        this.postsUpdated.next([...this.posts]);
+        this.router.navigate(['/']);
       });
   }
 }
