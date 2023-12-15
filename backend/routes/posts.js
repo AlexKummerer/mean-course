@@ -61,17 +61,13 @@ router.put(
       const url = req.protocol + "://" + req.get("host");
       imagePath = url + "/images/" + req.file.filename;
     }
-    console.log(req.file, "imagePath");
-    console.log(imagePath)
-    console.log(req.body.id, "body");
-    console.log(req.params.id);
+
     const post = new Post({
       _id: req.body.id,
       title: req.body.title,
       content: req.body.content,
       imagePath: imagePath,
     });
-    console.log(post);
     Post.updateOne({ _id: req.body.id }, post).then((result) => {
       res.status(200).json({ message: "Update successful!" });
     });
@@ -79,7 +75,14 @@ router.put(
 );
 
 router.get("", (req, res, next) => {
-  Post.find().then((docs) => {
+  const pageSize = +req.query.pageSize;
+  const currentPage = +req.query.page;
+  const postQuery = Post.find();
+  if (pageSize && currentPage) {
+    postQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
+  }
+
+  postQuery.then((docs) => {
     res
       .status(200)
       .json({ message: " Posts fetsched succesfully ", posts: docs });
