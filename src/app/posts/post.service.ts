@@ -110,12 +110,11 @@ export class PostService {
 
     let postData: Post | FormData;
     if (typeof post.image === 'object') {
-      const imageFile = post.image as File;
       postData = new FormData();
       postData.append('id', post.id);
       postData.append('title', post.title);
       postData.append('content', post.content);
-      postData.append('imagePath', imageFile, post.title);
+      postData.append('image', post.image, post.title);
     } else {
       postData = {
         id: post.id,
@@ -125,7 +124,8 @@ export class PostService {
       };
     }
 
-    console.log(postData);
+console.log(postData);
+
 
     this.http
       .put('http://localhost:3000/api/posts/' + postId, postData)
@@ -138,7 +138,7 @@ export class PostService {
           id: postId,
           title: post.title,
           content: post.content,
-          imagePath: post.imagePath,
+          image: post.imagePath,
         };
         updatedPosts[oldPostIndex] = post;
         this.posts = updatedPosts;

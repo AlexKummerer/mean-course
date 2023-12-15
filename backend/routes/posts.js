@@ -59,16 +59,20 @@ router.put(
     let imagePath = req.body.imagePath;
     if (req.file) {
       const url = req.protocol + "://" + req.get("host");
-      imagePath = url + "/images/" + req.file.filename
+      imagePath = url + "/images/" + req.file.filename;
     }
+    console.log(req.file, "imagePath");
+    console.log(imagePath)
+    console.log(req.body.id, "body");
+    console.log(req.params.id);
     const post = new Post({
       _id: req.body.id,
       title: req.body.title,
       content: req.body.content,
-      imagePath: imagePath
+      imagePath: imagePath,
     });
     console.log(post);
-    Post.updateOne({ _id: req.params.id }, post).then(result => {
+    Post.updateOne({ _id: req.body.id }, post).then((result) => {
       res.status(200).json({ message: "Update successful!" });
     });
   }
