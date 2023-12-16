@@ -13,16 +13,18 @@ router.post("/signup", (req, res) => {
       email: email,
       password: hash,
     });
+console.log(user);
 
     user
       .save()
       .then((result) => {
         res.status(201).json({
-          message: "User created",
+          message: "User created successfully!",
           result: result,
         });
       })
       .catch((err) => {
+        console.log(err);
         res.status(500).json({
           error: err,
         });

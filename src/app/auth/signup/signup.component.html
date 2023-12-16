@@ -2,9 +2,9 @@
 <!-- BEGIN: be15d9bcejpp -->
 <mat-card>
   <mat-card-content>
-    <h2>Login</h2>
+    <h2>SignUp</h2>
 
-    <form (submit)="onLogin(loginForm)" #loginForm="ngForm" *ngIf="!isLoading">
+    <form (submit)="onSignUp(loginForm)" #loginForm="ngForm" *ngIf="!isLoading">
       <mat-form-field>
         <mat-label>Email:</mat-label>
         <input matInput type="email" id="email" ngModel placeholder="E-Mail" name="email"  #emailInpit="ngModel" required email>
