@@ -1,6 +1,6 @@
 import { AppRoutingModule } from './app-routing.module';
 import { NgModule } from '@angular/core';
-import {  ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
@@ -17,13 +17,14 @@ import { PostListComponent } from './posts/post-list/post-list.component';
 import { HttpClientModule } from '@angular/common/http';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule } from '@angular/material/paginator';
-
+import { LoginComponent } from './auth/login/login.component';
 @NgModule({
   declarations: [
     AppComponent,
     PostCreateComponent,
     HeaderComponent,
     PostListComponent,
+    LoginComponent,
   ],
   imports: [
     BrowserModule,
@@ -39,6 +40,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
     AppRoutingModule,
     MatProgressSpinnerModule,
     MatPaginatorModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent],
