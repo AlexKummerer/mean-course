@@ -1,7 +1,6 @@
-
 const express = require("express");
 const bcrypt = require("bcrypt");
-const  jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const router = express.Router();
 const User = require("../models/user");
 
@@ -13,7 +12,7 @@ router.post("/signup", (req, res) => {
       email: email,
       password: hash,
     });
-console.log(user);
+    console.log(user);
 
     user
       .save()
@@ -32,16 +31,11 @@ console.log(user);
   });
 });
 
-
-
-const jwt = require("jsonwebtoken");
-
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
   User.findOne({ email: email })
     .exec()
     .then((user) => {
-      console.log(user);
       if (!user) {
         return res.status(401).json({
           message: "Authentication failed. User not found.",
@@ -54,7 +48,6 @@ router.post("/login", (req, res) => {
           });
         }
         if (result) {
-          console.log(result);
           const token = jwt.sign(
             { email: user.email, userId: user._id },
             "secret_this_should_be_longer",

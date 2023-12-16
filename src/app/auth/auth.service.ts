@@ -24,4 +24,24 @@ export class AuthService {
       }
     );
   }
+
+  login(authData: AuthData): void {
+    // Create authData object
+
+    this.http.post('http://localhost:3000/api/user/login', authData).subscribe(
+      (response) => {
+        console.log(response);
+
+        // Logic to handle successful login
+      },
+      (error) => {
+        console.log(error);
+
+        // Logic to handle login error
+      }
+    );
+  }
 }
+
+  
+
