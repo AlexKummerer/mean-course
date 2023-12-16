@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
 });
-s;
+
 
 userSchema.plugin(uniqueValidator);
 
