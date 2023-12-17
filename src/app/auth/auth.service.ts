@@ -1,17 +1,28 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AuthData } from './auth-data.model';
+import { Observable, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
+  private isAuthenticated = false;
   private token: string | undefined;
+  private authStatusListener = new Subject<boolean>();
 
   constructor(private http: HttpClient) {}
 
   getToken(): string | undefined {
     return this.token;
+  }
+
+  getIsAuth(): boolean {
+    return this.isAuthenticated;
+  }
+
+  getAuthStatusListener(): Observable<boolean> {
+    return this.authStatusListener.asObservable();
   }
 
   createUser(authData: AuthData): void {
@@ -40,6 +51,8 @@ export class AuthService {
         (response) => {
           const token = response.token;
           this.token = token;
+          this.isAuthenticated = this.token ? true : false;
+          this.authStatusListener.next(true);
           // Logic to handle successful login
         },
         (error) => {
