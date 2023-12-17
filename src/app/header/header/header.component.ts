@@ -14,7 +14,9 @@ export class HeaderComponent implements OnInit {
     this.authListenerSubs = new Subscription();
   }
 
+  
   ngOnInit(): void {
+    this.userIsAuthenticated = this.authService.getIsAuth();
     this.authListenerSubs = this.authService
       .getAuthStatusListener()
       .subscribe((isAuthenticated) => {
