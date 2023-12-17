@@ -11,8 +11,9 @@ export class AuthService {
   private isAuthenticated = false;
   private token: string | undefined;
   private authStatusListener = new Subject<boolean>();
+  private tokenTimer: NodeJS.Timer | undefined;
 
-  constructor(private http: HttpClient, private router :Router) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   getToken(): string | undefined {
     return this.token;
@@ -47,28 +48,35 @@ export class AuthService {
     // Create authData object
 
     this.http
-      .post<{ token: string }>('http://localhost:3000/api/user/login', authData)
-      .subscribe(
-        (response) => {
+      .post<{ token: string; expiresIn: number }>(
+        'http://localhost:3000/api/user/login',
+        authData
+      )
+      .subscribe({
+        next: (response: { token: string; expiresIn: number }) => {
           const token = response.token;
           this.token = token;
-          this.isAuthenticated = this.token ? true : false;
-          this.authStatusListener.next(true);
-          this.router.navigate(['/']);
-          // Logic to handle successful login
+          if (token) {
+            const expiresInDuration = response.expiresIn;
+            this.tokenTimer = setTimeout(() => {
+              this.logout();
+            }, expiresInDuration * 1000);
+            this.isAuthenticated = this.token ? true : false;
+            this.authStatusListener.next(true);
+            this.router.navigate(['/']);
+          }
         },
-        (error) => {
-          console.log(error);
-
-          // Logic to handle login error
-        }
-      );
+        error(err) {
+          console.log(err);
+        },
+      });
   }
 
   logout(): void {
     this.token = undefined;
     this.isAuthenticated = false;
     this.authStatusListener.next(false);
+    clearTimeout(this.tokenTimer!);
     this.router.navigate(['/']);
   }
 }
