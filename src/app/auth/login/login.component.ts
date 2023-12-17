@@ -13,9 +13,11 @@ export class LoginComponent {
 
   constructor(public authService: AuthService) {}
   onLogin(form: NgForm) {
+    this.isLoading = true;
     if (form.invalid) {
       return;
     }
+
     const authData: AuthData = {
       email: form.value.email,
       password: form.value.password,
