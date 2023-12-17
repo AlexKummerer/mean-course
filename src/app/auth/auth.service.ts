@@ -6,7 +6,13 @@ import { AuthData } from './auth-data.model';
   providedIn: 'root',
 })
 export class AuthService {
+  private token: string | undefined;
+
   constructor(private http: HttpClient) {}
+
+  getToken(): string | undefined {
+    return this.token;
+  }
 
   createUser(authData: AuthData): void {
     // Create authData object
@@ -28,20 +34,19 @@ export class AuthService {
   login(authData: AuthData): void {
     // Create authData object
 
-    this.http.post('http://localhost:3000/api/user/login', authData).subscribe(
-      (response) => {
-        console.log(response);
+    this.http
+      .post<{ token: string }>('http://localhost:3000/api/user/login', authData)
+      .subscribe(
+        (response) => {
+          const token = response.token;
+          this.token = token;
+          // Logic to handle successful login
+        },
+        (error) => {
+          console.log(error);
 
-        // Logic to handle successful login
-      },
-      (error) => {
-        console.log(error);
-
-        // Logic to handle login error
-      }
-    );
+          // Logic to handle login error
+        }
+      );
   }
 }
-
-  
-
