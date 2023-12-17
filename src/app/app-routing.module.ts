@@ -4,19 +4,23 @@ import { LoginComponent } from './auth/login/login.component'; // Import the Log
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SignupComponent } from './auth/signup/signup.component';
+import { AuthGuard } from './auth/auth.guard'; // Import the AuthGuard
+
 
 const routes: Routes = [
   { path: '', component: PostListComponent },
-  { path: 'create', component: PostCreateComponent },
-  { path: 'edit/:postId', component: PostCreateComponent },
-  { path: 'login', component: LoginComponent }, // Add the route for the LoginComponent
-  { path: 'signup', component: SignupComponent }, // Add the route for the SignupComponent
+  { path: 'create', component: PostCreateComponent, canActivate: [AuthGuard] },
+  { path: 'edit/:postId', component: PostCreateComponent, canActivate: [AuthGuard]},
+  { path: 'login', component: LoginComponent },
+  { path: 'signup', component: SignupComponent },
   // { path: '**', component: PageNotFoundComponent },
 ];
 
+
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
+ 
 })
 export class AppRoutingModule {}
 
