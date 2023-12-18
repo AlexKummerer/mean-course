@@ -1,16 +1,17 @@
-const bodyParser = require("body-parser");
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
 
-
 const postsRoutes = require("./routes/posts");
 const userRoutes = require("./routes/user");
+
 const app = express();
+
+// Import MongoDB connection string from a config file
+const dbConfig = require('./config/dbConfig');
+
 mongoose
-  .connect(
-    "mongodb+srv://dbAdmin:C4A8141040C2D5645AE7CD273915C221D63D123E89F9738B9AAE95D2265280F1@meancourse.n6pcukz.mongodb.net/?retryWrites=true&w=majority"
-  )
+  .connect(dbConfig.connectionString)
   .then(() => {
     console.log("Connected to database!");
   })
@@ -18,10 +19,9 @@ mongoose
     console.log("Connection failed");
   });
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use("/images", express.static(path.join("backend/images")));
-
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");

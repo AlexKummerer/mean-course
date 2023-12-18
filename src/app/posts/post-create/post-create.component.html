@@ -17,6 +17,6 @@
       <textarea matInput rows="4" formControlName="content" placeholder="Post Content"></textarea>
       <mat-error *ngIf="form.get('content')?.invalid">Please enter a post title.</mat-error>
     </mat-form-field>
-    <button mat-raised-button color="accent" type="submit">Save Post</button>
+    <button mat-raised-button color="accent"  [disabled]="form.invalid" type="submit">Save Post</button>
   </form>
 </mat-card>
