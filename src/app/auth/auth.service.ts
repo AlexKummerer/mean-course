@@ -3,7 +3,9 @@ import { Injectable, Injector } from '@angular/core';
 import { AuthData } from './auth-data.model';
 import { Observable, Subject } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
+const API_URL = environment.apiUrl + 'user/';
 @Injectable({
   providedIn: 'root',
 })
@@ -41,28 +43,26 @@ export class AuthService {
     // Create authData object
     console.log(authData);
 
-    this.http
-      .post('http://localhost:3000/api/user/signup', authData)
-      .subscribe({
-        next: (response) => {
-          console.log(response);
+    this.http.post(API_URL + 'signup', authData).subscribe({
+      next: (response) => {
+        console.log(response);
 
-          this.router.navigate(['/']);
-        },
-        error: (err) => {
-          console.log(err);
+        this.router.navigate(['/']);
+      },
+      error: (err) => {
+        console.log(err);
 
-          if (this.authStatusListener) {
-            this.authStatusListener.next(false);
-          }
-        },
-      });
+        if (this.authStatusListener) {
+          this.authStatusListener.next(false);
+        }
+      },
+    });
   }
 
   login(authData: AuthData): void {
     this.http
       .post<{ token: string; expiresIn: number; userId: string }>(
-        'http://localhost:3000/api/user/login',
+        API_URL + 'login',
         authData
       )
       .subscribe({

@@ -5,7 +5,10 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, map, max } from 'rxjs/operators';
+import { environment } from '../../environments/environment'
 
+
+const API_URL =   environment.apiUrl + 'posts/';
 @Injectable({ providedIn: 'root' })
 export class ServiceNameService {
   constructor(private httpClient: HttpClient) {}
@@ -30,7 +33,7 @@ export class PostService {
     const queryParams = `?pageSize=${postsPerPage}&page=${currentPage}`;
     this.http
       .get<{ message: string; posts: any; maxPosts: number }>(
-        'http://localhost:3000/api/posts' + queryParams
+        API_URL + queryParams
       )
       .pipe(
         map((postData) => {
@@ -69,7 +72,7 @@ export class PostService {
         content: string;
         imagePath: string;
         creator: string;
-      }>('http://localhost:3000/api/posts/' + id)
+      }>(API_URL + id)
       .pipe(
         map((postData) => {
           return {
@@ -99,7 +102,7 @@ export class PostService {
     }
     this.http
       .post<{ message: string; post: Post }>(
-        'http://localhost:3000/api/posts',
+        API_URL,
         postData
       )
       .subscribe((respData) => {
@@ -108,7 +111,7 @@ export class PostService {
   }
 
   deletePost(postId: string) {
-    return this.http.delete('http://localhost:3000/api/posts/' + postId);
+    return this.http.delete( API_URL + postId);
   }
 
   async updatePostbyId(postId: string, post: Post) {
@@ -131,7 +134,7 @@ export class PostService {
     }
 
     this.http
-      .put('http://localhost:3000/api/posts/' + postId, postData)
+      .put(API_URL + postId, postData)
       .subscribe((response) => {
         this.router.navigate(['/']);
       });
