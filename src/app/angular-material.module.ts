@@ -31,6 +31,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
     MatProgressSpinnerModule,
     MatPaginatorModule,
     MatDialogModule,
+    
   ],
 })
 export class AngularMaterialModule {}
