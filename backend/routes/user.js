@@ -6,6 +6,7 @@ const User = require("../models/user");
 
 // Create a new user
 router.post("/signup", (req, res) => {
+  console.log(req.body);
   const { email, password } = req.body;
   bcrypt.hash(password, 10).then((hash) => {
     const user = new User({

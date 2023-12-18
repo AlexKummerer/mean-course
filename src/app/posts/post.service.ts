@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { Post } from './post.model';
 import { Subject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -15,7 +15,13 @@ export class ServiceNameService {
   providedIn: 'root',
 })
 export class PostService {
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private injector: Injector
+  ) {
+    setTimeout(() => (this.http = injector.get(HttpClient)));
+  }
 
   private posts: Post[] = [];
   private postsUpdated = new Subject<{ posts: Post[]; postCount: number }>();
@@ -44,7 +50,7 @@ export class PostService {
       )
       .subscribe((transformedPosts) => {
         console.log(transformedPosts);
-        
+
         const { posts, maxPosts } = transformedPosts;
         this.posts = posts as Post[];
         this.postsUpdated.next({ posts: this.posts, postCount: maxPosts });
@@ -57,9 +63,13 @@ export class PostService {
 
   getPostById(id: string): Observable<Post | null> {
     return this.http
-      .get<{ _id: string; title: string; content: string; imagePath: string , creator :string}>(
-        'http://localhost:3000/api/posts/' + id
-      )
+      .get<{
+        _id: string;
+        title: string;
+        content: string;
+        imagePath: string;
+        creator: string;
+      }>('http://localhost:3000/api/posts/' + id)
       .pipe(
         map((postData) => {
           return {
@@ -67,9 +77,8 @@ export class PostService {
             title: postData.title,
             content: postData.content,
             imagePath: postData.imagePath,
-            creator: postData.creator
+            creator: postData.creator,
           } as Post;
-          
         }),
         catchError(() => {
           return of(null);

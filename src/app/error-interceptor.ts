@@ -8,28 +8,44 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorComponent } from './error/error.component';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
+  constructor(private dialog: MatDialog) {}
+
   intercept(
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    return next.handle(request).pipe(
-      catchError((error: HttpErrorResponse) => {
-        let errorMessage = 'An unknown error occurred';
-        if (error.error instanceof ErrorEvent) {
-          // Client-side error
-          errorMessage = `Error: ${error.error.error.message}`;
-        } else {
-          // Server-side error
-          errorMessage = `Error Code: ${error.status}\nMessage: ${error.error.error.message}`;
-        }
-        alert(error.error.error.message);
-        console.error(errorMessage);
-        const err = new Error(errorMessage);
-        return throwError(() => err);
-      })
-    );
+    console.log('Handling request:', request);
+    console.log('Handling next:', next);
+    try {
+      return next.handle(request).pipe(
+        catchError((error: HttpErrorResponse) => {
+          console.log(error);
+
+          let errorMessage = 'An unknown error occurred';
+          if (error.error instanceof ErrorEvent) {
+            // Client-side error
+            errorMessage = `Error: ${
+              error.error.message || error.error.error.message
+            }`;
+          } else {
+            // Server-side error
+            errorMessage = `Error Code: ${error.status}\nMessage: ${
+              error.error.message || error.error.error.message
+            }`;
+          }
+          this.dialog.open(ErrorComponent, { data: { message: errorMessage } });
+          const err = new Error(errorMessage);
+          return throwError(() => err);
+        })
+      );
+    } catch (error: any) {
+      console.log(error);
+      return throwError(() => error);
+    }
   }
 }

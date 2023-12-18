@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { AuthData } from './auth-data.model';
 import { Observable, Subject } from 'rxjs';
 import { Router } from '@angular/router';
@@ -14,7 +14,13 @@ export class AuthService {
   private tokenTimer: NodeJS.Timer | undefined;
   private userId: string | undefined;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private injector: Injector
+  ) {
+    setTimeout(() => (this.http = injector.get(HttpClient)));
+  }
 
   getToken(): string | undefined {
     return this.token;
@@ -33,14 +39,19 @@ export class AuthService {
 
   createUser(authData: AuthData): void {
     // Create authData object
+    console.log(authData);
 
     this.http
       .post('http://localhost:3000/api/user/signup', authData)
       .subscribe({
         next: (response) => {
+          console.log(response);
+
           this.router.navigate(['/']);
         },
         error: (err) => {
+          console.log(err);
+
           if (this.authStatusListener) {
             this.authStatusListener.next(false);
           }
@@ -57,6 +68,7 @@ export class AuthService {
       .subscribe({
         next: (response) => this.handleAuthentication(response),
         error: (err) => {
+          console.log(err);
           if (this.authStatusListener) {
             this.authStatusListener.next(false);
           }
