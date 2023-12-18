@@ -57,7 +57,7 @@ export class PostService {
 
   getPostById(id: string): Observable<Post | null> {
     return this.http
-      .get<{ _id: string; title: string; content: string; imagePath: string }>(
+      .get<{ _id: string; title: string; content: string; imagePath: string , creator :string}>(
         'http://localhost:3000/api/posts/' + id
       )
       .pipe(
@@ -67,7 +67,9 @@ export class PostService {
             title: postData.title,
             content: postData.content,
             imagePath: postData.imagePath,
-          };
+            creator: postData.creator
+          } as Post;
+          
         }),
         catchError(() => {
           return of(null);
