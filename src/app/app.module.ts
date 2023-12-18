@@ -9,7 +9,6 @@ import { AuthInterceptor } from './auth/auth-interceptor';
 import { ErrorInterceptor } from './error-interceptor';
 import { AngularMaterialModule } from './angular-material.module';
 import { PostsModule } from './posts/post.module';
-import { AuthModule } from './auth/auth.module';
 
 @NgModule({
   declarations: [AppComponent, HeaderComponent],
@@ -20,7 +19,6 @@ import { AuthModule } from './auth/auth.module';
     AppRoutingModule,
     AngularMaterialModule,
     PostsModule,
-    AuthModule,
   ],
   providers: [
     {
