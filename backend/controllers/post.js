@@ -25,7 +25,6 @@ exports.createPost = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
       res.status(500).json({
         message: "Couldn't add post!",
       });
@@ -49,7 +48,6 @@ exports.updatePost = (req, res, next) => {
       }
     })
     .catch((err) => {
-      console.log(err);
       res.status(500).json({
         message: "Couldn't update post!",
       });
@@ -91,6 +89,11 @@ exports.getPost = (req, res, next) => {
     } else {
       res.status(404).json({ message: "Post not found!" });
     }
+  }).catch((err) => {
+    console.log(err);
+    res.status(500).json({
+      message: "Couldn't fetch post!",
+    });
   });
 };
 

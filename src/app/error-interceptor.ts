@@ -19,13 +19,9 @@ export class ErrorInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    console.log('Handling request:', request);
-    console.log('Handling next:', next);
     try {
       return next.handle(request).pipe(
         catchError((error: HttpErrorResponse) => {
-          console.log(error);
-
           let errorMessage = 'An unknown error occurred';
           if (error.error instanceof ErrorEvent) {
             // Client-side error
@@ -44,7 +40,6 @@ export class ErrorInterceptor implements HttpInterceptor {
         })
       );
     } catch (error: any) {
-      console.log(error);
       return throwError(() => error);
     }
   }

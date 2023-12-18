@@ -18,7 +18,7 @@ export class PostListComponent implements OnInit {
   currentPage = 1;
   pageSizeOptions = [1, 2, 5, 10];
   userIsAuthenticated = false;
-  userId: string | undefined= '';
+  userId: string | undefined = '';
   private authListenerSubs: Subscription = new Subscription();
 
   constructor(
@@ -64,9 +64,13 @@ export class PostListComponent implements OnInit {
   }
 
   onDeletePost(postId: string) {
-    this.postService.deletePost(postId).subscribe(() => {
-      this.postService.getPosts(this.postsPerPage, this.currentPage);
-    });
+    this.isLoading = true;
+    this.postService.deletePost(postId).subscribe(
+      () => {
+        this.postService.getPosts(this.postsPerPage, this.currentPage);
+        this.isLoading = false;
+      },
+    );
   }
 
   onChangedPage(pageData: PageEvent) {
