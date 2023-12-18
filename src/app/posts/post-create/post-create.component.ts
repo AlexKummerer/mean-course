@@ -1,29 +1,35 @@
 import { Post } from './../post.model';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, NgForm, Validators } from '@angular/forms';
 import { PostService } from '../post.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { mimeType } from './mime-type.validator';
+import { Subscription } from 'rxjs';
+import { AuthService } from 'src/app/auth/auth.service';
 @Component({
   selector: 'app-post-create',
   templateUrl: './post-create.component.html',
   styleUrls: ['./post-create.component.css'],
 })
-export class PostCreateComponent implements OnInit {
+export class PostCreateComponent implements OnInit, OnDestroy {
   newPost = 'NO CONTENT';
   enteredContent: string = '';
   enteredTitle: string = '';
   isLoading = false;
   imagePreview!: string;
   form: FormGroup = new FormGroup({});
-
   private mode = 'create';
   private postId!: string | null;
   post!: Post | null;
-
-  constructor(public postService: PostService, public route: ActivatedRoute) {}
+  private authStatusSub!: Subscription;
+  constructor(public postService: PostService, public route: ActivatedRoute, private authService :AuthService) {}
 
   async ngOnInit(): Promise<void> {
+    this.authStatusSub = this.authService
+      .getAuthStatusListener()
+      .subscribe((authStatus) => {
+        this.isLoading = false;
+      });
     this.form = new FormGroup({
       title: new FormControl('', {
         validators: [Validators.required, Validators.minLength(3)],
@@ -31,7 +37,7 @@ export class PostCreateComponent implements OnInit {
       content: new FormControl(null, { validators: [Validators.required] }),
       image: new FormControl(null, {
         validators: [Validators.required],
-        asyncValidators: [ mimeType],
+        asyncValidators: [mimeType],
       }),
     });
 
@@ -40,7 +46,7 @@ export class PostCreateComponent implements OnInit {
         this.mode = 'edit';
         this.postId = paramMap.get('postId') as string;
         this.isLoading = !this.isLoading;
-        await this.postService
+        this.postService
           .getPostById(this.postId)
           .subscribe((postData: Post | null) => {
             console.log(postData);
@@ -50,14 +56,14 @@ export class PostCreateComponent implements OnInit {
                 id: postData.id,
                 title: postData.title,
                 content: postData.content,
-                imagePath: postData?.imagePath || "",
+                imagePath: postData?.imagePath || '',
               };
               this.form.setValue({
                 title: this.post.title,
                 content: this.post.content,
-                image: this.post?.imagePath ||"",
+                image: this.post?.imagePath || '',
               });
-              this.imagePreview = this.post.imagePath ||"" as string;
+              this.imagePreview = this.post.imagePath || ('' as string);
               this.isLoading = false;
             }
           });
@@ -72,8 +78,8 @@ export class PostCreateComponent implements OnInit {
     console.log('onImagePicked called');
     const file = (event.target as HTMLInputElement).files![0];
     console.log('Selected file:', file);
-   this.form.patchValue({ image: file });
-  await this.form.get('image')?.updateValueAndValidity();
+    this.form.patchValue({ image: file });
+    await this.form.get('image')?.updateValueAndValidity();
     console.log(this.form.get('image'));
 
     const reader = new FileReader();
@@ -82,7 +88,7 @@ export class PostCreateComponent implements OnInit {
     };
     console.log(this.form.get('image'));
     reader.readAsDataURL(file);
-}
+  }
 
   public async onSavePost(): Promise<void> {
     console.log(this.form);
@@ -109,5 +115,11 @@ export class PostCreateComponent implements OnInit {
     }
 
     this.form.reset();
+  }
+
+  ngOnDestroy(): void {
+    //Called once, before the instance is destroyed.
+    //Add 'implements OnDestroy' to the class.
+    this.authStatusSub.unsubscribe();
   }
 }
