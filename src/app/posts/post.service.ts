@@ -35,6 +35,7 @@ export class PostService {
                 content: post.content,
                 id: post._id,
                 imagePath: post.imagePath,
+                creator: post.creator,
               } as Post;
             }),
             maxPosts: postData.maxPosts,
@@ -42,6 +43,8 @@ export class PostService {
         })
       )
       .subscribe((transformedPosts) => {
+        console.log(transformedPosts);
+        
         const { posts, maxPosts } = transformedPosts;
         this.posts = posts as Post[];
         this.postsUpdated.next({ posts: this.posts, postCount: maxPosts });
