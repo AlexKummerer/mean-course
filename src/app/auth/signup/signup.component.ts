@@ -36,7 +36,14 @@ export class SignupComponent implements OnInit, OnDestroy {
       email: form.value.email,
       password: form.value.password,
     };
-    this.authService.createUser(authData);
+    this.authService.createUser(authData).subscribe({
+      next: (response) => {
+        console.log('User created', response);
+      },
+      error: (err) => {
+        console.log(err);
+      },
+    });
   }
   ngOnDestroy(): void {
     //Called once, before the instance is destroyed.

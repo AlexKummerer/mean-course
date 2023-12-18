@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Injector } from '@angular/core';
 import { AuthData } from './auth-data.model';
-import { Observable, Subject, tap } from 'rxjs';
+import { Observable, Subject, catchError, of, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 
@@ -39,17 +39,16 @@ export class AuthService {
 
   createUser(authData: AuthData): Observable<any> {
     return this.http.post(API_URL + 'signup', authData).pipe(
-      tap({
-        next: (response) => {
-          console.log(response);
-          this.router.navigate(['/']);
-        },
-        error: (err) => {
-          console.log(err);
-          this.authStatusListener.next(false);
-        },
-      })
-    );
+      tap((response) => {
+        console.log(response);
+        this.router.navigate(['/']);
+      }),
+      catchError(err => {
+        console.log(err);
+        this.authStatusListener.next(false);
+        return of(err);
+      }
+      ))
   }
 
   login(authData: AuthData): Observable<any> {
