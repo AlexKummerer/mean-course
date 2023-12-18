@@ -1,5 +1,5 @@
 
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { LoginComponent } from './login/login.component';
 import { SignupComponent } from './signup/signup.component';
 import { AngularMaterialModule } from '../angular-material.module';
@@ -18,7 +18,7 @@ import { AuthRoutingModule } from './auth-routing.module';
     FormsModule,
     AuthRoutingModule
   ],
-
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 
 export class AuthModule {}

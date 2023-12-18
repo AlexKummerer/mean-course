@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { PostCreateComponent } from './post-create/post-create.component';
 import { PostListComponent } from './post-list/post-list.component';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -13,6 +13,7 @@ import { RouterModule } from '@angular/router';
     AngularMaterialModule,
     CommonModule,
     RouterModule,
-  ]
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class PostsModule {}

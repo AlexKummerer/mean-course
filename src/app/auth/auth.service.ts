@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Injector } from '@angular/core';
 import { AuthData } from './auth-data.model';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 
@@ -13,15 +13,13 @@ export class AuthService {
   private isAuthenticated = false;
   private token: string | undefined;
   private authStatusListener = new Subject<boolean>();
-  private tokenTimer: NodeJS.Timer | undefined;
+  private tokenTimer: any | undefined;
   private userId: string | undefined;
 
   constructor(
     private router: Router,
     private http: HttpClient,
-    private injector: Injector
   ) {
-    setTimeout(() => (this.http = injector.get(HttpClient)));
   }
 
   getToken(): string | undefined {
@@ -39,41 +37,38 @@ export class AuthService {
     return this.authStatusListener.asObservable();
   }
 
-  createUser(authData: AuthData): void {
-    // Create authData object
-    console.log(authData);
-
-    this.http.post(API_URL + 'signup', authData).subscribe({
-      next: (response) => {
-        console.log(response);
-
-        this.router.navigate(['/']);
-      },
-      error: (err) => {
-        console.log(err);
-
-        if (this.authStatusListener) {
+  createUser(authData: AuthData): Observable<any> {
+    return this.http.post(API_URL + 'signup', authData).pipe(
+      tap({
+        next: (response) => {
+          console.log(response);
+          this.router.navigate(['/']);
+        },
+        error: (err) => {
+          console.log(err);
           this.authStatusListener.next(false);
-        }
-      },
-    });
+        },
+      })
+    );
   }
 
-  login(authData: AuthData): void {
-    this.http
+  login(authData: AuthData): Observable<any> {
+   return this.http
       .post<{ token: string; expiresIn: number; userId: string }>(
         API_URL + 'login',
         authData
       )
-      .subscribe({
-        next: (response) => this.handleAuthentication(response),
-        error: (err) => {
-          console.log(err);
-          if (this.authStatusListener) {
-            this.authStatusListener.next(false);
-          }
-        },
-      });
+      .pipe(
+        tap({
+          next: (response) => this.handleAuthentication(response),
+          error: (err) => {
+            console.log(err);
+            if (this.authStatusListener) {
+              this.authStatusListener.next(false);
+            }
+          },
+        })
+      );
   }
 
   handleAuthentication(response: {
