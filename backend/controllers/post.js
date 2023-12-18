@@ -10,6 +10,7 @@ const createPostObject = (req, imagePath) =>
     content: req.body.content,
     imagePath: imagePath,
     creator: req.userData.userId,
+    _id: req.body.id,
   });
 
 exports.createPost = async (req, res, next) => {
@@ -37,16 +38,19 @@ exports.updatePost = async (req, res, next) => {
       imagePath = createImageUrl(req);
     }
     const post = createPostObject(req, imagePath);
+
     const result = await Post.updateOne(
       { _id: req.body.id, creator: req.userData.userId },
       post
     );
-    if (result.modifiedCount > 0) {
+    console.log(result);
+    if (result.matchedCount > 0) {
       res.status(200).json({ message: "Update successful!" });
     } else {
       res.status(401).json({ message: "Not authorized" });
     }
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       message: "Couldn't update post!",
     });
