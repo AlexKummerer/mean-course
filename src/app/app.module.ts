@@ -6,22 +6,17 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
 import { PostCreateComponent } from './posts/post-create/post-create.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
+
 import { HeaderComponent } from './header/header/header.component';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatToolbarModule } from '@angular/material/toolbar';
+
 import { PostListComponent } from './posts/post-list/post-list.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatPaginatorModule } from '@angular/material/paginator';
+
 import { LoginComponent } from './auth/login/login.component';
 import { SignupComponent } from './auth/signup/signup.component';
 import { AuthInterceptor } from './auth/auth-interceptor';
 import { ErrorInterceptor } from './error-interceptor';
-import { MatDialogModule } from '@angular/material/dialog';
+import { AngularMaterialModule } from './modules/angular-material.module';
 
 @NgModule({
   declarations: [
@@ -31,24 +26,15 @@ import { MatDialogModule } from '@angular/material/dialog';
     PostListComponent,
     LoginComponent,
     SignupComponent,
-    
   ],
   imports: [
     BrowserModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatCardModule,
-    MatButtonModule,
-    MatToolbarModule,
-    MatExpansionModule,
+    FormsModule,
     HttpClientModule,
     AppRoutingModule,
-    MatProgressSpinnerModule,
-    MatPaginatorModule,
-    FormsModule,
-    MatDialogModule,
+    AngularMaterialModule,
   ],
   providers: [
     {
@@ -62,7 +48,7 @@ import { MatDialogModule } from '@angular/material/dialog';
       multi: true,
     },
   ],
-  
+
   bootstrap: [AppComponent],
 })
 export class AppModule {}
