@@ -34,18 +34,18 @@ export class AuthService {
   createUser(authData: AuthData): void {
     // Create authData object
 
-    this.http.post('http://localhost:3000/api/user/signup', authData).subscribe(
-      (response) => {
-        console.log(response);
-
-        // Logic to handle successful API response
-      },
-      (error) => {
-        console.log(error);
-
-        // Logic to handle API error
-      }
-    );
+    this.http
+      .post('http://localhost:3000/api/user/signup', authData)
+      .subscribe({
+        next: (response) => {
+          this.router.navigate(['/']);
+        },
+        error: (err) => {
+          if (this.authStatusListener) {
+            this.authStatusListener.next(false);
+          }
+        },
+      });
   }
 
   login(authData: AuthData): void {
@@ -56,8 +56,10 @@ export class AuthService {
       )
       .subscribe({
         next: (response) => this.handleAuthentication(response),
-        error(err) {
-          console.log(err);
+        error: (err) => {
+          if (this.authStatusListener) {
+            this.authStatusListener.next(false);
+          }
         },
       });
   }
