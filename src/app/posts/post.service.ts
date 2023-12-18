@@ -1,33 +1,22 @@
-import { Injectable, Injector } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Post } from './post.model';
-import { Subject } from 'rxjs';
+import { Subject, Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { catchError, map, max } from 'rxjs/operators';
-import { environment } from '../../environments/environment'
+import { catchError, map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
+import { createFormData } from '../utility/createFormData';
 
-
-const API_URL =   environment.apiUrl + 'posts/';
-@Injectable({ providedIn: 'root' })
-export class ServiceNameService {
-  constructor(private httpClient: HttpClient) {}
-}
+const API_URL = environment.apiUrl + 'posts/';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PostService {
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private injector: Injector
-  ) {
-    setTimeout(() => (this.http = injector.get(HttpClient)));
-  }
-
   private posts: Post[] = [];
   private postsUpdated = new Subject<{ posts: Post[]; postCount: number }>();
+
+  constructor(private http: HttpClient, private router: Router) {}
 
   getPosts(postsPerPage: number, currentPage: number) {
     const queryParams = `?pageSize=${postsPerPage}&page=${currentPage}`;
@@ -35,29 +24,28 @@ export class PostService {
       .get<{ message: string; posts: any; maxPosts: number }>(
         API_URL + queryParams
       )
-      .pipe(
-        map((postData) => {
-          return {
-            posts: postData.posts.map((post: any) => {
-              return {
-                title: post.title,
-                content: post.content,
-                id: post._id,
-                imagePath: post.imagePath,
-                creator: post.creator,
-              } as Post;
-            }),
-            maxPosts: postData.maxPosts,
-          };
-        })
-      )
+      .pipe(map(this.transformPosts), catchError(this.handleError))
       .subscribe((transformedPosts) => {
-        console.log(transformedPosts);
-
-        const { posts, maxPosts } = transformedPosts;
-        this.posts = posts as Post[];
-        this.postsUpdated.next({ posts: this.posts, postCount: maxPosts });
+        if (transformedPosts) {
+          this.posts = transformedPosts.posts;
+          this.postsUpdated.next({
+            posts: [...this.posts],
+            postCount: transformedPosts.maxPosts,
+          });
+        }
       });
+  }
+  private transformPosts(postData: { posts: any[]; maxPosts: number }) {
+    return {
+      posts: postData.posts.map((post) => ({
+        title: post.title,
+        content: post.content,
+        id: post._id,
+        imagePath: post.imagePath,
+        creator: post.creator,
+      })),
+      maxPosts: postData.maxPosts,
+    };
   }
 
   getPostUpdateListener() {
@@ -74,56 +62,49 @@ export class PostService {
         creator: string;
       }>(API_URL + id)
       .pipe(
-        map((postData) => {
-          return {
-            id: postData._id,
-            title: postData.title,
-            content: postData.content,
-            imagePath: postData.imagePath,
-            creator: postData.creator,
-          } as Post;
-        }),
-        catchError(() => {
-          return of(null);
-        })
+        map(this.transformPost),
+        catchError(() => of(null))
       );
   }
 
+  private transformPost(postData: {
+    _id: string;
+    title: string;
+    content: string;
+    imagePath: string;
+    creator: string;
+  }) {
+    return {
+      id: postData._id,
+      title: postData.title,
+      content: postData.content,
+      imagePath: postData.imagePath,
+      creator: postData.creator,
+    } as Post;
+  }
+
   addPost(newPost: Post) {
-    const postData = new FormData();
-    postData.append('title', newPost.title);
-    postData.append('content', newPost.content);
-    if (newPost.image) {
-      if (typeof newPost.image === 'string') {
-        postData.append('image', newPost.image);
-      } else {
-        postData.append('image', newPost.image, newPost.title);
-      }
-    }
+    const postData: FormData = createFormData(newPost);
+    console.log(postData);
+
     this.http
-      .post<{ message: string; post: Post }>(
-        API_URL,
-        postData
-      )
-      .subscribe((respData) => {
-        this.router.navigate(['/']);
-      });
+      .post<{ message: string; post: Post }>(API_URL, postData)
+      .subscribe(() => this.router.navigate(['/']));
+  }
+
+  private handleError(error: any): Observable<null> {
+    console.error('An error occurred', error);
+    return of(null);
   }
 
   deletePost(postId: string) {
-    return this.http.delete( API_URL + postId);
+    return this.http.delete(API_URL + postId);
   }
 
   async updatePostbyId(postId: string, post: Post) {
-    console.log(post);
-
     let postData: Post | FormData;
     if (typeof post.image === 'object') {
-      postData = new FormData();
-      postData.append('id', post.id);
-      postData.append('title', post.title);
-      postData.append('content', post.content);
-      postData.append('image', post.image, post.title);
+      postData = createFormData(post);
     } else {
       postData = {
         id: post.id,
@@ -132,11 +113,6 @@ export class PostService {
         imagePath: post.image ? post.image.toString() : undefined,
       };
     }
-
-    this.http
-      .put(API_URL + postId, postData)
-      .subscribe((response) => {
-        this.router.navigate(['/']);
-      });
+    return this.http.put(API_URL + postId, postData);
   }
 }

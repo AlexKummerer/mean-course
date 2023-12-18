@@ -10,7 +10,7 @@ const createPostObject = (req, imagePath) =>
     content: req.body.content,
     imagePath: imagePath,
     creator: req.userData.userId,
-    _id: req.body.id,
+    _id: req.body.id ? req.body.id : null,
   });
 
 exports.createPost = async (req, res, next) => {

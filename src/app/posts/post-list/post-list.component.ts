@@ -25,7 +25,6 @@ export class PostListComponent implements OnInit {
     public postService: PostService,
     private authService: AuthService
   ) {
-    this.authListenerSubs = new Subscription();
   }
 
   ngOnInit(): void {

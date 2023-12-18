@@ -1,0 +1,28 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true,
+    "MONGO_ATLAS_PW": "C4A8141040C2D5645AE7CD273915C221D63D123E89F9738B9AAE95D2265280F1",
+    "JWT_KEY": "secret_this_should_be_longer"
+  },
+  "extends": ["airbnb-base", "plugin:prettier/recommended"],
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly",
+    "document": true,
+    "window": true,
+    "fetch": true,
+    "localStorage": true,
+    "FormData": true,
+    "FileReader": true,
+    "Blob": true,
+    "navigator": true,
+    "URL": true,
+    "URLSearchParams": true,
+    "Headers": true,
+    "Request": true,
+    "Response": true,
+    "IntersectionObserver": true,
+    "IntersectionObserverEntry": true
+  }
+}

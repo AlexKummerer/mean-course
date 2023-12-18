@@ -1,20 +1,18 @@
 import { Post } from './../post.model';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup, NgForm, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { PostService } from '../post.service';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { mimeType } from './mime-type.validator';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
+
 @Component({
   selector: 'app-post-create',
   templateUrl: './post-create.component.html',
   styleUrls: ['./post-create.component.css'],
 })
 export class PostCreateComponent implements OnInit, OnDestroy {
-  newPost = 'NO CONTENT';
-  enteredContent: string = '';
-  enteredTitle: string = '';
   isLoading = false;
   imagePreview!: string;
   form: FormGroup = new FormGroup({});
@@ -22,14 +20,21 @@ export class PostCreateComponent implements OnInit, OnDestroy {
   private postId!: string | null;
   post!: Post | null;
   private authStatusSub!: Subscription;
-  constructor(public postService: PostService, public route: ActivatedRoute, private authService :AuthService) {}
 
-  async ngOnInit(): Promise<void> {
+  constructor(
+    public postService: PostService,
+    public route: ActivatedRoute,
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
     this.authStatusSub = this.authService
       .getAuthStatusListener()
-      .subscribe((authStatus) => {
+      .subscribe(() => {
         this.isLoading = false;
       });
+
     this.form = new FormGroup({
       title: new FormControl('', {
         validators: [Validators.required, Validators.minLength(3)],
@@ -41,16 +46,13 @@ export class PostCreateComponent implements OnInit, OnDestroy {
       }),
     });
 
-    this.route.paramMap.subscribe(async (paramMap: ParamMap) => {
+    this.route.paramMap.subscribe((paramMap: ParamMap) => {
       if (paramMap.has('postId')) {
         this.mode = 'edit';
         this.postId = paramMap.get('postId') as string;
-        this.isLoading = !this.isLoading;
-        this.postService
-          .getPostById(this.postId)
-          .subscribe((postData: Post | null) => {
-            console.log(postData);
-
+        this.isLoading = true;
+        this.postService.getPostById(this.postId).subscribe(
+          (postData: Post | null) => {
             if (postData) {
               this.post = {
                 id: postData.id,
@@ -63,10 +65,11 @@ export class PostCreateComponent implements OnInit, OnDestroy {
                 content: this.post.content,
                 image: this.post?.imagePath || '',
               });
-              this.imagePreview = this.post.imagePath || ('' as string);
+              this.imagePreview = this.post.imagePath || '';
               this.isLoading = false;
             }
-          });
+          },
+        );
       } else {
         this.mode = 'create';
         this.postId = null;
@@ -74,25 +77,19 @@ export class PostCreateComponent implements OnInit, OnDestroy {
     });
   }
 
-  async onImagePicked(event: Event) {
-    console.log('onImagePicked called');
+  onImagePicked(event: Event) {
     const file = (event.target as HTMLInputElement).files![0];
-    console.log('Selected file:', file);
     this.form.patchValue({ image: file });
-    await this.form.get('image')?.updateValueAndValidity();
-    console.log(this.form.get('image'));
+    this.form.get('image')?.updateValueAndValidity();
 
     const reader = new FileReader();
     reader.onload = () => {
       this.imagePreview = reader.result as string;
     };
-    console.log(this.form.get('image'));
     reader.readAsDataURL(file);
   }
 
   public async onSavePost(): Promise<void> {
-    console.log(this.form);
-
     if (this.form.invalid) {
       return;
     }
@@ -104,22 +101,20 @@ export class PostCreateComponent implements OnInit, OnDestroy {
       content: this.form.value?.content ?? '',
       image: this.form.value?.image ?? '',
     };
-    console.log(post);
 
     if (this.mode === 'create') {
       this.postService.addPost(post);
     } else {
-      console.log(post);
-
-      await this.postService.updatePostbyId(this.postId as string, post);
+      this.postService
+        .updatePostbyId(this.postId as string, post)
+        .then(() => {
+          this.router.navigate(['/']);
+        });
     }
-
     this.form.reset();
   }
 
   ngOnDestroy(): void {
-    //Called once, before the instance is destroyed.
-    //Add 'implements OnDestroy' to the class.
     this.authStatusSub.unsubscribe();
   }
 }
