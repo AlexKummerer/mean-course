@@ -5,6 +5,11 @@
     "MONGO_ATLAS_PW": "C4A8141040C2D5645AE7CD273915C221D63D123E89F9738B9AAE95D2265280F1",
     "JWT_KEY": "secret_this_should_be_longer"
   },
+
+
+  "scripts": {
+    "start": "node server.js"
+  },
   "extends": ["airbnb-base", "plugin:prettier/recommended"],
   "globals": {
     "Atomics": "readonly",
