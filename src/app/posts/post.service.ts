@@ -7,6 +7,8 @@ import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { createFormData } from '../utility/createFormData';
 
+console.log(environment);
+
 const API_URL = environment.apiUrl + 'posts/';
 
 @Injectable({

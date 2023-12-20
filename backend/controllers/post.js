@@ -1,4 +1,3 @@
-const { async } = require("rxjs");
 const Post = require("../models/post");
 
 const createImageUrl = (req) =>
